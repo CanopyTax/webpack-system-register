@@ -37,6 +37,6 @@ All configuration options are passed as properties of the object given to the We
 
 - `systemjsDeps` (optional): an array of dependency names that should not be bundled into the webpack bundle, but instead be provided by SystemJS.
 - `registerName` (optional): a string that SystemJS will use as the name of the module.
-- 
+ 
 ## Exporting variables from webpack into SystemJS.
 To do this, simply export the variables from your webpack entry file. They will automatically be exposed to anybody who `System.import`s your webpack bundle.
