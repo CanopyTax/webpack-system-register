@@ -3,7 +3,7 @@ A webpack plugin that wraps your bundle in a [System.register](https://github.co
 
 ## Features
 - `System.import` webpack apps.
-- load systemjs dependencies into webpack apps.
+- load systemjs dependencies into webpack apps, by excluding those dependencies from the webpack bundle and declaring them as SystemJS dependencies.
 - export variables from webpack apps into systemjs apps.
 
 ## Usage
