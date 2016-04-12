@@ -1,7 +1,7 @@
 # webpack-system-register
 A webpack plugin that wraps your bundle in a [System.register](https://github.com/ModuleLoader/es6-module-loader/wiki/System.register-Explained) call. This makes webpack bundles totally consumable by [SystemJS](https://github.com/systemjs/systemjs).
 
-Features:
+## Features
 - `System.import` webpack apps.
 - load systemjs dependencies into webpack apps.
 - export variables from webpack apps into systemjs apps.
