@@ -15,7 +15,6 @@ npm install --save-dev webpack-system-register
 Then add it to your webpack plugins.
 ```js
 // webpack.config.js
-const path = require('path');
 const WebpackSystemRegister = require('webpack-system-register');
 
 module.exports = {
