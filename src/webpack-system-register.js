@@ -33,7 +33,12 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 		// http://stackoverflow.com/questions/35092183/webpack-plugin-how-can-i-modify-and-re-parse-a-module-after-compilation
 		compilation.plugin('seal', () => {
 			compilation.modules.forEach(module => {
-				if (module.entry) {
+				let isEntry = module.entry;
+				const entries = (compiler.options.entry || {});
+				for (let entryName in entries) {
+					isEntry = module.rawRequest === entries[entryName];
+				}
+				if (isEntry) {
 					module._source._value += `\n$__register__main__exports(exports);`;
 				}
 			});
@@ -112,6 +117,9 @@ function sysRegisterEnd(opts) {
 }
 
 function toJsVarName(systemJsImportName) {
-	const modName = systemJsImportName.includes('!') ? systemJsImportName.slice(0, systemJsImportName.indexOf('!')) : systemJsImportName;
-	return toCamelCase(modName);
+	return toCamelCase(moduleName(systemJsImportName));
+}
+
+function moduleName(systemJsImportName) {
+	return systemJsImportName.includes('!') ? systemJsImportName.slice(0, systemJsImportName.indexOf('!')) : systemJsImportName;
 }
