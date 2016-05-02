@@ -22,9 +22,9 @@ module.exports = {
 	plugins: [
 		new WebpackSystemRegister({
 			systemjsDeps: [
-				/^react/', //any import that starts with react
-				'react-dom', //literally just react-dom as an import
-				/^lodash/, // any import that starts with lodash
+				/^react/',
+				'react-dom',
+				/^lodash/,
 			],
 			registerName: 'test-module', // optional name that SystemJS will know this bundle as.
 		}),
