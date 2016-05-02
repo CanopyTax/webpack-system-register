@@ -166,13 +166,10 @@ function sysRegisterStart(opts, externalModules) {
 	}
 
 	function toSetters(name, i) {
+		// webpack needs the __esModule flag to know how to do it's interop require default func
 		return `${i > 0 ? ',' : ''}
       function(m) {
-        if (m && m.__proto__ && m.__proto__.constructor && m.__proto__.constructor.toString && m.__proto__.constructor.toString() === 'function Module() {}') {
-          ${name} = Object.assign({}, m, { __esModule: true });
-        } else {
-          ${name} = m;
-        }
+        ${name} = Object.assign({}, m, { __esModule: true });
       }`;
 	}
 
