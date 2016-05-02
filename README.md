@@ -22,8 +22,9 @@ module.exports = {
 	plugins: [
 		new WebpackSystemRegister({
 			systemjsDeps: [
-				'react',
-				'react-dom',
+				/^react/', //any import that starts with react
+				'react-dom', //literally just react-dom as an import
+				/^lodash/, // any import that starts with lodash
 			],
 			registerName: 'test-module', // optional name that SystemJS will know this bundle as.
 		}),
@@ -34,7 +35,7 @@ module.exports = {
 ## Configuration Options
 All configuration options are passed as properties of the object given to the WebpackSystemRegister constructor.
 
-- `systemjsDeps` (optional): an array of dependency names that should not be bundled into the webpack bundle, but instead be provided by SystemJS.
+- `systemjsDeps` (optional): an array of dependency names that should not be bundled into the webpack bundle, but instead be provided by SystemJS. These dependency names should either be literal strings or Regular Expressions.
 - `registerName` (optional): a string that SystemJS will use as the name of the module.
  
 ## Exporting variables from webpack into SystemJS.
