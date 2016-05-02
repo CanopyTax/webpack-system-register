@@ -5,7 +5,8 @@
   "main": "lib/webpack-system-register.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "babel src --out-dir lib"
+    "build": "babel src --out-dir lib",
+    "prepublish": "npm run build"
   },
   "author": "Joel Denning",
   "license": "Apache-2.0",
