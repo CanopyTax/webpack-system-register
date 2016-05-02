@@ -1,5 +1,8 @@
-const ConcatSource = require("webpack-sources").ConcatSource;
-const toCamelCase = require('varname').camelcase;
+import path from 'path';
+import fs from 'fs';
+import { ConcatSource } from 'webpack-sources';
+import { camelcase as toCamelCase } from 'varname';
+import PrefetchDependency from 'webpack/lib/dependencies/PrefetchDependency';
 
 module.exports = WebpackSystemRegister;
 
@@ -20,12 +23,61 @@ function WebpackSystemRegister(options) {
 
 WebpackSystemRegister.prototype.apply = function(compiler) {
 	const options = this.options;
+	const externalModuleFiles = [];
+	const externalModules = [];
 
-	options.systemjsDeps.forEach(systemJsDep => {
-		if (compiler.options.externals[systemJsDep]) {
-			throw new Error(`SystemJS dependency '${systemJsDep}' cannot also be a webpack external (webpack-system-register plugin)`);
-		}
-		compiler.options.externals[systemJsDep] = toJsVarName(systemJsDep);
+	if (!compiler.options.resolve) {
+		compiler.options.resolve = {}
+	}
+
+	if (!compiler.options.resolve.alias) {
+		compiler.options.resolve.alias = {};
+	}
+
+	compiler.plugin('normal-module-factory', function(nmf) {
+		nmf.plugin('before-resolve', function(result, callback) {
+			if (!result) {
+				return callback();
+			}
+
+			if (options.systemjsDeps.find(dep => dep.test(result.request))) {
+				const filename = `__${toJsVarName(result.request)}`;
+				if (externalModuleFiles.indexOf(filename) < 0) {
+					externalModuleFiles.push(filename)
+					fs.writeFile(filename, `module.exports = ${toJsVarName(result.request)};`, err => {
+						if (err) {
+							console.error(err);
+							throw err;
+						}
+
+						externalModules.push({
+							depFullPath: result.request,
+							depVarName: toJsVarName(result.request),
+						});
+						result.request = path.resolve(process.cwd(), filename);
+
+						callback(null, result);
+					});
+				} else {
+					result.request = path.resolve(process.cwd(), filename);
+					callback(null, result);
+				}
+			} else {
+				callback(null, result)
+			}
+		});
+
+		nmf.plugin('after-resolve', function(result, callback) {
+			if (!result) {
+				return callback();
+			}
+
+			if (options.systemjsDeps.find(dep => dep.test(result.request))) {
+				result.resource = path.resolve(process.cwd(), `__${toJsVarName(result.request)}`);
+			}
+
+			callback(null, result);
+		});
 	});
 
 	compiler.plugin("compilation", compilation => {
@@ -46,13 +98,21 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 
 		// Based on https://github.com/webpack/webpack/blob/ded70aef28af38d1deb2ac8ce1d4c7550779963f/lib/WebpackSystemRegister.js
 		compilation.plugin("optimize-chunk-assets", (chunks, callback) => {
+			externalModuleFiles.forEach(file => {
+				fs.unlink(file, err => {
+					if (err) {
+						throw err;
+					}
+				});
+			});
+
 			chunks.forEach(chunk => {
 				if (!chunk.initial) {
 					return;
 				}
 
 				chunk.files.forEach(file => {
-					compilation.assets[file] = new ConcatSource(sysRegisterStart(options), compilation.assets[file], sysRegisterEnd(options));
+					compilation.assets[file] = new ConcatSource(sysRegisterStart(options, externalModules), compilation.assets[file], sysRegisterEnd(options));
 				});
 			});
 			callback();
@@ -60,10 +120,10 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 	});
 };
 
-function sysRegisterStart(opts) {
+function sysRegisterStart(opts, externalModules) {
 	const result =
 `System.register(${registerName()}${depsList()}, function($__export) {
-  var ${opts.systemjsDeps.map(toJsVarName).map(toCommaSeparatedList).reduce(toString)};
+  var ${externalModules.map(toDepVarName).map(toCommaSeparatedList).reduce(toString)};
 
   function $__register__main__exports(exports) {
     for (var exportName in exports) {
@@ -72,7 +132,7 @@ function sysRegisterStart(opts) {
   }
 
   return {
-    setters: [${opts.systemjsDeps.map(toSetters).reduce(toString)}
+    setters: [${externalModules.map(toDepVarName).map(toSetters).reduce(toString)}
     ],
     execute: function() {
 `
@@ -83,7 +143,7 @@ function sysRegisterStart(opts) {
 	}
 
 	function depsList() {
-		return `[${opts.systemjsDeps.map(toStringLiteral).map(toCommaSeparatedList).reduce(toString)}]`;
+		return `[${externalModules.map(toDepFullPath).map(toStringLiteral).map(toCommaSeparatedList).reduce(toString)}]`;
 	}
 
 	function toCommaSeparatedList(name, i) {
@@ -93,7 +153,7 @@ function sysRegisterStart(opts) {
 	function toSetters(name, i) {
 		return `${i > 0 ? ',' : ''}
       function(m) {
-        ${toJsVarName(name)} = m;
+        ${name} = m;
 	  }`;
 	}
 
@@ -117,9 +177,21 @@ function sysRegisterEnd(opts) {
 }
 
 function toJsVarName(systemJsImportName) {
-	return toCamelCase(moduleName(systemJsImportName));
+	return toCamelCase(removeSlashes(moduleName(systemJsImportName)));
 }
 
 function moduleName(systemJsImportName) {
 	return systemJsImportName.includes('!') ? systemJsImportName.slice(0, systemJsImportName.indexOf('!')) : systemJsImportName;
+}
+
+function removeSlashes(systemJsImportName) {
+	return systemJsImportName.replace('/', '');
+}
+
+function toDepVarName(externalModule) {
+	return externalModule.depVarName;
+}
+
+function toDepFullPath(externalModule) {
+	return externalModule.depFullPath;
 }
