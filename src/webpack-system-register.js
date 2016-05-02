@@ -164,8 +164,12 @@ function sysRegisterStart(opts, externalModules) {
 	function toSetters(name, i) {
 		return `${i > 0 ? ',' : ''}
       function(m) {
-        ${name} = m;
-	  }`;
+        if (m && m.__proto__ && m.__proto__.constructor && m.__proto__.constructor.toString && m.__proto__.constructor.toString() === 'function Module() {}') {
+          ${name} = Object.assign({}, m, { __esModule: true });
+        } else {
+          ${name} = m;
+        }
+      }`;
 	}
 
 	function toStringLiteral(str) {
