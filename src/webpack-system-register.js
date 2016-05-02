@@ -23,6 +23,17 @@ function WebpackSystemRegister(options) {
 
 WebpackSystemRegister.prototype.apply = function(compiler) {
 	const options = this.options;
+	options.systemjsDeps = (options.systemjsDeps || []).map(depName => {
+		if (typeof depName === 'string') {
+			// literal string match, as a regular expression
+			return new RegExp(`^${depName}$`);
+		} else if (depName instanceof RegExp) {
+			return depName;
+		} else {
+			throw new Error(`systemJsDeps must either be a string or a regular expression`);
+		}
+	})
+
 	const externalModuleFiles = [];
 	const externalModules = [];
 
