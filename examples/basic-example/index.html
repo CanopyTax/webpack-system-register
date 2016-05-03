@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width">
+		<title>webpack-system-register basic example</title>
+	</head>
+	<body>
+		<div id="main-content">
+		</div>
+
+		<div id="webpack-content">
+		</div>
+
+		<script src="systemjs-app/jspm_packages/system-polyfills.src.js"></script>
+		<script src="systemjs-app/jspm_packages/system.src.js"></script>
+		<script src="systemjs-app/jspm.browser.js"></script>
+		<script src="systemjs-app/jspm.config.js"></script>
+
+		<script>
+			SystemJS.import('systemjs-app');
+		</script>
+	</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "basic-example",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "cd ../.. && npm install && npm run build && cd examples/basic-example/systemjs-app && npm install && cd ../webpack-app && npm install && npm run build",
+    "start": "http-server ."
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "http-server": "^0.9.0"
+  }
+}
