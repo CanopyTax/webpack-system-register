@@ -40,3 +40,6 @@ All configuration options are passed as properties of the object given to the We
  
 ## Exporting variables from webpack into SystemJS.
 To do this, simply export the variables from your webpack entry file. They will automatically be exposed to anybody who `System.import`s your webpack bundle.
+
+## Examples
+To run the [examples](https://github.com/CanopyTax/webpack-system-register/tree/master/examples) locally, run `npm install && npm run build` from inside of the example directory that you're interested in. Then run `npm start` and open up your web browser to localhost:8080.
