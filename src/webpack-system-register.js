@@ -2,7 +2,6 @@ import path from 'path';
 import fs from 'fs';
 import { ConcatSource } from 'webpack-sources';
 import { camelcase as toCamelCase } from 'varname';
-import PrefetchDependency from 'webpack/lib/dependencies/PrefetchDependency';
 
 module.exports = WebpackSystemRegister;
 
@@ -101,7 +100,7 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 				for (let entryName in entries) {
 					isEntry = module.rawRequest === entries[entryName];
 				}
-				if (isEntry) {
+				if (isEntry && module._source) {
 					module._source._value += `\n$__register__main__exports(exports);`;
 				}
 			});
