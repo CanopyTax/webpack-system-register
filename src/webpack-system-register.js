@@ -51,7 +51,7 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 			}
 
 			if (options.systemjsDeps.find(dep => dep.test(result.request))) {
-				const filename = `__${toJsVarName(result.request)}`;
+				const filename = `node_modules/__${toJsVarName(result.request)}`;
 				if (externalModuleFiles.indexOf(filename) < 0) {
 					externalModuleFiles.push(filename)
 					fs.writeFile(filename, `module.exports = ${toJsVarName(result.request)};`, err => {
@@ -108,18 +108,6 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 
 		// Based on https://github.com/webpack/webpack/blob/ded70aef28af38d1deb2ac8ce1d4c7550779963f/lib/WebpackSystemRegister.js
 		compilation.plugin("optimize-chunk-assets", (chunks, callback) => {
-			externalModuleFiles.forEach(file => {
-				fs.exists(file, exists => {
-					if (exists) {
-						fs.unlink(file, err => {
-							if (err) {
-								throw err;
-							}
-						});
-					}
-				});
-			});
-
 			chunks.forEach(chunk => {
 				if (!chunk.initial) {
 					return;
