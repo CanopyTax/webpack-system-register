@@ -13,9 +13,8 @@ function WebpackSystemRegister(options) {
 		throw new Error(`webpack-system-register requires that systemjsDeps is an array of strings`);
 
 	this.options = {
-		...{
-			systemjsDeps: [],
-		},
+		minify: false,
+		systemjsDeps: [],
 		...options
 	};
 }
@@ -134,11 +133,12 @@ function sysRegisterStart(opts, externalModules) {
   }
 
   return {
-    setters: [${externalModules.map(toDepVarName).map(toSetters).reduce(toString)}
+    setters: [${externalModules.map(toDepVarName).map(toSetters.bind(null, opts)).reduce(toString)}
     ],
     execute: function() {
 `
-	return result;
+
+	return opts.minify ? minify(result) : result;
 
 	function registerName() {
 		return opts.registerName ? `'${opts.registerName}', ` : '';
@@ -152,12 +152,14 @@ function sysRegisterStart(opts, externalModules) {
 		return `${i > 0 ? ', ' : ''}${name}`;
 	}
 
-	function toSetters(name, i) {
+	function toSetters(opts, name, i) {
 		// webpack needs the __esModule flag to know how to do it's interop require default func
-		return `${i > 0 ? ',' : ''}
+		const result = `${i > 0 ? ',' : ''}
       function(m) {
         ${name} = Object.assign({}, m, { __esModule: true });
       }`;
+
+		return opts.minify ? minify(result) : result;	
 	}
 
 	function toStringLiteral(str) {
@@ -176,7 +178,7 @@ function sysRegisterEnd(opts) {
   }
 });
 `
-	return result;
+	return opts.minify ? minify(result) : result;
 }
 
 function toJsVarName(systemJsImportName) {
@@ -197,4 +199,8 @@ function toDepVarName(externalModule) {
 
 function toDepFullPath(externalModule) {
 	return externalModule.depFullPath;
+}
+
+function minify(string) {
+	return string.replace(/\n/g, '');
 }
