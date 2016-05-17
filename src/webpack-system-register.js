@@ -132,6 +132,10 @@ function sysRegisterStart(opts, externalModules) {
     }
   }
 
+  function $__wsr__interop(m) {
+	return m.__useDefault ? m.default : m;
+  }
+
   return {
     setters: [${externalModules.map(toDepVarName).map(toSetters.bind(null, opts)).reduce(toString)}
     ],
@@ -156,7 +160,7 @@ function sysRegisterStart(opts, externalModules) {
 		// webpack needs the __esModule flag to know how to do it's interop require default func
 		const result = `${i > 0 ? ',' : ''}
       function(m) {
-        ${name} = Object.assign({}, m, { __esModule: true });
+        ${name} = $__wsr__interop(m);
       }`;
 
 		return opts.minify ? minify(result) : result;	
