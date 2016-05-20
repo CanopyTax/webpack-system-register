@@ -9,18 +9,31 @@ function WebpackSystemRegister(options) {
 	if (typeof options !== 'object')
 		throw new Error("webpack-system-register takes exactly one argument (pass an options object)");
 
-	if (options.systemjsDeps && !Array.isArray(options.systemjsDeps))
-		throw new Error(`webpack-system-register requires that systemjsDeps is an array of strings`);
-
 	this.options = {
+		registerName: null,
 		minify: false,
 		systemjsDeps: [],
+		publicPath: {
+			useSystemJSLocateDir: false,
+		},
 		...options
 	};
+
+	if (!Array.isArray(this.options.systemjsDeps))
+		throw new Error(`webpack-system-register requires that systemjsDeps is an array of strings`);
+
+	if (this.options.publicPath.useSystemJSLocateDir && typeof this.options.registerName !== 'string') {
+		throw new Error(`webpack-system-register requires opts.registerName when opts.publicPath.useSystemJSLocateDir is truthy`);
+	}
 }
 
 WebpackSystemRegister.prototype.apply = function(compiler) {
 	const options = this.options;
+
+	if (compiler.options.output.publicPath && options.publicPath.useSystemJSLocateDir) {
+		throw new Error(`webpack-system-register -- should not set webpack output.publicPath while simultaneously setting webpack-system-register's opts.publicPath`);
+	}
+
 	options.systemjsDeps = (options.systemjsDeps || []).map(depName => {
 		if (typeof depName === 'string') {
 			// literal string match, as a regular expression
@@ -91,6 +104,13 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 
 	compiler.plugin("compilation", compilation => {
 
+		// Can't override the __webpack_require__.p via plugin because of https://github.com/webpack/webpack/blob/1b459d91f56215a3c617373d456ad53f9a63fea3/lib/MainTemplate.js#L99
+		if (options.publicPath.useSystemJSLocateDir) {
+			compilation.mainTemplate.plugin('require-extensions', function(source, chunk, hash) {
+				return source.replace(/__webpack_require__\.p = \".*\";/, '__webpack_require__.p = $__wsr__public__path;');
+			});
+		}
+
 		// http://stackoverflow.com/questions/35092183/webpack-plugin-how-can-i-modify-and-re-parse-a-module-after-compilation
 		compilation.plugin('seal', () => {
 			compilation.modules.forEach(module => {
@@ -122,9 +142,23 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 };
 
 function sysRegisterStart(opts, externalModules) {
-	const result =
+	let result =
 `System.register(${registerName()}${depsList()}, function($__export) {
   var ${externalModules.map(toDepVarName).map(toCommaSeparatedList).reduce(toString)};
+${opts.publicPath.useSystemJSLocateDir
+	? `
+  /* potentially the first load is always the one we're interested in??? if so .find should short circuit anyway so no perf probs */
+  var $__wsr__load = SystemJS._loader.loads.find(function(load) {
+    return load.name === SystemJS.normalizeSync('${opts.registerName}');
+  });
+
+  if (!$__wsr__load) {
+    throw new Error("webpack-system-register plugin cannot correctly set webpack's publicPath, since there is no current SystemJS load for " + SystemJS.normalizeSync('${opts.registerName}'))
+  }
+
+  var $__wsr__public__path = $__wsr__load.address.substring(0, $__wsr__load.address.lastIndexOf('/') + 1);`
+	: ``
+}
 
   function $__register__main__exports(exports) {
     for (var exportName in exports) {
@@ -141,7 +175,6 @@ function sysRegisterStart(opts, externalModules) {
     ],
     execute: function() {
 `
-
 	return opts.minify ? minify(result) : result;
 
 	function registerName() {
