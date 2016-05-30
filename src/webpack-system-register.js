@@ -144,7 +144,7 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 function sysRegisterStart(opts, externalModules) {
 	let result =
 `System.register(${registerName()}${depsList()}, function($__export) {
-  var ${externalModules.map(toDepVarName).map(toCommaSeparatedList).reduce(toString)};
+  ${externalModules.length > 0 ? `var ${externalModules.map(toDepVarName).map(toCommaSeparatedList).reduce(toString, '')};` : ``}
 ${opts.publicPath.useSystemJSLocateDir
 	? `
   /* potentially the first load is always the one we're interested in??? if so .find should short circuit anyway so no perf probs */
@@ -171,7 +171,7 @@ ${opts.publicPath.useSystemJSLocateDir
   }
 
   return {
-    setters: [${externalModules.map(toDepVarName).map(toSetters.bind(null, opts)).reduce(toString)}
+    setters: [${externalModules.map(toDepVarName).map(toSetters.bind(null, opts)).reduce(toString, '')}
     ],
     execute: function() {
 `
@@ -182,7 +182,7 @@ ${opts.publicPath.useSystemJSLocateDir
 	}
 
 	function depsList() {
-		return `[${externalModules.map(toDepFullPath).map(toStringLiteral).map(toCommaSeparatedList).reduce(toString)}]`;
+		return `[${externalModules.map(toDepFullPath).map(toStringLiteral).map(toCommaSeparatedList).reduce(toString, '')}]`;
 	}
 
 	function toCommaSeparatedList(name, i) {
