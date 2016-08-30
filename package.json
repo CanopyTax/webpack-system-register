@@ -10,6 +10,10 @@
   },
   "author": "Joel Denning",
   "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CanopyTax/webpack-system-register"
+  },
   "devDependencies": {
     "babel-cli": "^6.7.5",
     "babel-plugin-transform-object-rest-spread": "^6.6.5",
