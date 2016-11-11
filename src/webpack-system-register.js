@@ -115,7 +115,10 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 		compilation.plugin('seal', () => {
 			compilation.modules.forEach(module => {
 				let isEntry = module.entry;
-				const entries = (compiler.options.entry || {});
+				let entries = (compiler.options.entry || {});
+				if (typeof entries === 'string') {
+					entries = {main: entries};
+				}
 				for (let entryName in entries) {
 					isEntry = module.rawRequest === entries[entryName];
 				}
