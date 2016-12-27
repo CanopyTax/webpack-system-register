@@ -1,16 +1,21 @@
 System.register(['react'], function($__export) {
   var React;
 
+
   function $__register__main__exports(exports) {
     for (var exportName in exports) {
 	  $__export(exportName, exports[exportName]);
     }
   }
 
+  function $__wsr__interop(m) {
+	return m.__useDefault ? m.default : m;
+  }
+
   return {
     setters: [
       function(m) {
-        React = Object.assign({}, m, { __esModule: true });
+        React = $__wsr__interop(m);
       }
     ],
     execute: function() {
