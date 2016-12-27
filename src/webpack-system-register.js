@@ -131,7 +131,7 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 		// Based on https://github.com/webpack/webpack/blob/ded70aef28af38d1deb2ac8ce1d4c7550779963f/lib/WebpackSystemRegister.js
 		compilation.plugin("optimize-chunk-assets", (chunks, callback) => {
 			chunks.forEach(chunk => {
-				if (!chunk.isInitial()) {
+				if (chunk.isInitial ? !chunk.isInitial() : !chunk.initial) {
 					return;
 				}
 
