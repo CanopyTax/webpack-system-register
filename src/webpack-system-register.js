@@ -114,7 +114,7 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 		// http://stackoverflow.com/questions/35092183/webpack-plugin-how-can-i-modify-and-re-parse-a-module-after-compilation
 		compilation.plugin('seal', () => {
 			compilation.modules.forEach(module => {
-				let isEntry = module.entry;
+				let isEntry = module.entryModule;
 				let entries = (compiler.options.entry || {});
 				if (typeof entries === 'string') {
 					entries = {main: entries};
@@ -131,7 +131,7 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 		// Based on https://github.com/webpack/webpack/blob/ded70aef28af38d1deb2ac8ce1d4c7550779963f/lib/WebpackSystemRegister.js
 		compilation.plugin("optimize-chunk-assets", (chunks, callback) => {
 			chunks.forEach(chunk => {
-				if (!chunk.initial) {
+				if (chunk.isInitial ? !chunk.isInitial() : !chunk.initial) {
 					return;
 				}
 
