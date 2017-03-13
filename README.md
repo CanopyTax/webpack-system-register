@@ -1,6 +1,9 @@
 # webpack-system-register
 A webpack plugin that wraps your bundle in a [System.register](https://github.com/ModuleLoader/es6-module-loader/wiki/System.register-Explained) call. This makes webpack bundles totally consumable by [SystemJS](https://github.com/systemjs/systemjs).
 
+## Alternatives
+Note that you can achieve much of the same behavior by changing your webpack config to [output an AMD module](https://webpack.js.org/configuration/output/#output-library), and then using externals to declare the dependencies that you want to get from SystemJS. This method is probably preferable over the webpack-system-register plugin, in most cases. One of the reasons why you may still want to use this plugin, though, is if you are having trouble configuring webpack's [public path](https://webpack.js.org/guides/public-path/#components/sidebar/sidebar.jsx), since webpack-system-register gives you the ability to use a dynamic public path at runtime in the browser (see configuration options below).
+
 ## Motivation
 - `System.import` webpack apps.
 - Inject SystemJS modules into webpack bundles.
