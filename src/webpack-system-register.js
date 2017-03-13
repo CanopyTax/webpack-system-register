@@ -116,6 +116,12 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 			compilation.modules.forEach(module => {
 				let isEntry = module.entryModule;
 				let entries = (compiler.options.entry || {});
+				let isHarmonyModule = module.meta && module.meta.harmonyModule;
+				let exportsArgument = 'exports';
+
+				if (isHarmonyModule) {
+					exportsArgument = '__webpack_exports__';
+				}
 				if (typeof entries === 'string') {
 					entries = {main: entries};
 				}
@@ -123,7 +129,7 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 					isEntry = module.rawRequest === entries[entryName];
 				}
 				if (isEntry && module._source) {
-					module._source._value += `\n$__register__main__exports(exports);`;
+					module._source._value += `\n$__register__main__exports(${exportsArgument});`;
 				}
 			});
 		});
