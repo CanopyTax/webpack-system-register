@@ -116,7 +116,7 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 			compilation.modules.forEach(module => {
 				let isEntry = module.entryModule;
 				let entries = (compiler.options.entry || {});
-				let isHarmonyModule = module.meta && module.meta.harmonyModule;
+				let isHarmonyModule = module.buildMeta ? (module.buildMeta.exportsType === 'namespace') : (module.meta && module.meta.harmonyModule);
 				let exportsArgument = 'exports';
 
 				if (isHarmonyModule) {
@@ -137,7 +137,7 @@ WebpackSystemRegister.prototype.apply = function(compiler) {
 		// Based on https://github.com/webpack/webpack/blob/ded70aef28af38d1deb2ac8ce1d4c7550779963f/lib/WebpackSystemRegister.js
 		compilation.plugin("optimize-chunk-assets", (chunks, callback) => {
 			chunks.forEach(chunk => {
-				if (chunk.isInitial ? !chunk.isInitial() : !chunk.initial) {
+			        if (!(chunk.isOnlyInitial ? chunk.isOnlyInitial() : chunk.isInitial ? chunk.isInitial() : chunk.initial)) {
 					return;
 				}
 
