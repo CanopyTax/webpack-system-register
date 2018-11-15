@@ -66,4 +66,4 @@ module.exports = {
 To do this, simply export the variables from your webpack entry file. They will automatically be exposed to anybody who `System.import`s your webpack bundle. Note that (at least right now) if you mutate an exported value that that mutation will *not* be re-exported like it's supposed to according to the ES6 spec. The reason for this is basically just that it's really hard for me to detect mutation so I decided not to try.
 
 ## Examples
-To run the [examples](https://github.com/CanopyTax/webpack-system-register/tree/master/examples) locally, run `npm install && npm run build` from inside of the example directory that you're interested in. Then run `npm start` and open up your web browser to localhost:8080.
+To run the [examples](https://github.com/CanopyTax/webpack-system-register/tree/master/examples) locally, choose the `webpack-app-x.x` app that you want to use and rename it to `webpack-app`, run `npm install && npm run build` from inside of the `basic-example` directory. Then run `npm start` and open up your web browser to localhost:8080.
